@@ -1,10 +1,20 @@
 # DeepGoal — 2026 世界盃淘汰賽推演板
 
+🌐 **https://kobetime520-code.github.io/worldcup-2026/**
+
 單檔靜態網頁，呈現 2026 世界盃八強到決賽的賽程、已知賽果與模型機率。無框架、無 CDN、無 build step。
+
+| 項目 | 內容 |
+|---|---|
+| 維護者 | **Ann**（Team PID 生管專員） |
+| 上級 | Terry |
+| 維運手冊 | [OPERATIONS.md](OPERATIONS.md) — 每日巡檢、故障排除、token 更換 |
+| 自動更新 | 台灣時間 09:00 / 15:00 / 21:00 / 03:00，2026-07-21 後自動停用 |
 
 ```
 .
 ├── index.html                    # 頁面本體（含內嵌資料快照，file:// 直開即可用）
+├── OPERATIONS.md                 # 維運手冊（Ann）
 ├── data/matches.json             # 唯一真實來源
 └── scripts/
     ├── refresh.mjs               # 抓取 + 驗證 + 蓋時間戳 + 把快照內嵌回 index.html
