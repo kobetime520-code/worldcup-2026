@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepGoal — 2026 世界盃淘汰賽推演板</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --panel: rgba(255,255,255,.72);
+    --border: #e4e1db;
+    --text: #2f2b26;
+    --muted: #857f76;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --live: #e11d48;
+    --done: #0f766e;
+    --shadow: 0 8px 30px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14131a;
+      --panel: rgba(30,29,38,.72);
+      --border: #322f3d;
+      --text: #e8e5e0;
+      --muted: #98928a;
+      --accent: #818cf8;
+      --accent-soft: #23213050;
+      --live: #fb7185;
+      --done: #2dd4bf;
+      --shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Noto Sans TC", -apple-system, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+
+  header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px 24px; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
+  h1 { font-size: 1.5rem; margin: 0; letter-spacing: .5px; }
+  .sub { color: var(--muted); font-size: .8rem; margin-top: 2px; }
+  .stamp { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+  button.refresh { margin-top: 6px; background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+    font-size: .75rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+  button.refresh:hover { filter: brightness(1.05); }
+  button.refresh:disabled { opacity: .5; cursor: default; }
+
+  .bracket { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--border); background: var(--panel); border-radius: 999px;
+    padding: 6px 14px; font-size: .78rem; font-weight: 700; color: var(--muted);
+    cursor: pointer; font-family: inherit; }
+  .chip[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
+  .card-top { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center;
+    padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: .74rem; color: var(--muted); }
+  .round { font-weight: 800; color: var(--accent); letter-spacing: .06em; }
+  .status { font-weight: 800; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .status.finished { color: var(--done); }
+  .status.live { color: var(--live); border-color: var(--live); }
+  .status.scheduled { color: var(--muted); }
+
+  .teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 24px 20px; }
+  .team { text-align: center; }
+  /* Windows / Chrome 不繪製國旗 emoji（會退成 "FR" 之類的字母），故一律用代碼色塊。 */
+  .badge { width: 58px; height: 58px; margin: 0 auto; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 900; font-size: .95rem;
+    letter-spacing: .04em;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.25), var(--shadow); }
+  .tname { font-weight: 800; margin-top: 6px; }
+  .fair { font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .mid { text-align: center; min-width: 92px; }
+  .score { font-size: 1.9rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .vs { font-size: .8rem; font-weight: 800; color: var(--muted); }
+  .countdown { font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 4px; }
+
+  .bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden;
+    margin: 0 20px; border: 1px solid var(--border); }
+  .bar span { display: block; }
+  .legend { display: flex; justify-content: space-between; margin: 8px 20px 0;
+    font-size: .7rem; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .xg { margin: 14px 20px 0; padding: 8px 14px; border-radius: 10px; background: var(--accent-soft);
+    border: 1px solid var(--border); font-size: .76rem; text-align: center; font-variant-numeric: tabular-nums; }
+  .notes { margin: 14px 20px 20px; font-size: .8rem; color: var(--muted); }
+  .tbd { margin: 0 20px 20px; font-size: .8rem; color: var(--muted); font-style: italic; }
+
+  footer { margin-top: 40px; font-size: .72rem; color: var(--muted); text-align: center; }
+  footer strong { color: var(--live); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>⚽ DeepGoal — 2026 世界盃淘汰賽推演板</h1>
+      <div class="sub">八強 → 決賽　·　時間以台灣時間 (UTC+8) 顯示</div>
+    </div>
+    <div>
+      <div class="stamp">資料版本：<span id="stamp">—</span></div>
+      <div class="stamp">頁面時間：<span id="clock">—</span></div>
+      <button class="refresh" id="refresh">重新載入資料</button>
+    </div>
+  </header>
+
+  <div class="bracket" id="filters"></div>
+  <div id="list"></div>
+
+  <footer>
+    <p>機率為<strong>啟發式先驗</strong>（賽前評分 + 本屆走勢 + 傷停），非回測擬合模型；「公平賠率」為 1 ÷ 機率的推導值，<strong>不是任何博彩公司的盤口報價</strong>。</p>
+    <p>本頁僅供足球分析與資料視覺化參考，不構成投注建議。運彩具財務風險，請自行斟酌。</p>
+    <p>DeepGoal v7 · 資料來源 FIFA / ESPN / Olympics.com 交叉查證</p>
+  </footer>
+</div>
+
+<script type="application/json" id="bootstrap">{"meta":{"tournament":"2026 FIFA World Cup","hosts":["USA","Canada","Mexico"],"lastUpdated":"2026-07-10T06:46:03Z","displayTimezone":"Asia/Taipei","source":"football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料","dataNotes":{"results":"賽果與賽程經 FIFA / ESPN / Olympics.com 交叉查證，之後由 football-data.org 自動覆蓋。","odds":"本檔不收錄博彩公司報價。fairOdds 為模型機率的倒數（1/p），屬推導值而非市場盤口。","model":"probs 為啟發式先驗（賽前 Elo 評分 + 本屆走勢 + 傷停），非回測擬合模型。請勿當作投注依據。"}},"matches":[{"id":"QF1","no":97,"round":"quarter-final","roundLabel":"八強","kickoff":"2026-07-09T20:00:00Z","timeConfirmed":true,"venue":{"name":"Gillette Stadium","city":"Foxborough, MA"},"home":{"name":"法國","en":"France","code":"FRA","color":"#1e3a8a"},"away":{"name":"摩洛哥","en":"Morocco","code":"MAR","color":"#b91c1c"},"status":"finished","score":{"home":2,"away":0,"duration":"REGULAR","penalties":null},"probs":{"home":0.62,"draw":0.23,"away":0.15},"xg":{"home":1.9,"away":0.7},"notes":"姆巴佩、登貝雷各入一球。姆巴佩終場前 15 分鐘因腳踝挫傷被換下，賽後受訪表示「我沒事」，距四強戰還有 5 天，預期可上陣。"},{"id":"QF2","no":98,"round":"quarter-final","roundLabel":"八強","kickoff":"2026-07-10T19:00:00Z","timeConfirmed":true,"venue":{"name":"SoFi Stadium","city":"Inglewood, CA"},"home":{"name":"西班牙","en":"Spain","code":"ESP","color":"#dc2626"},"away":{"name":"比利時","en":"Belgium","code":"BEL","color":"#eab308"},"status":"scheduled","score":null,"probs":{"home":0.55,"draw":0.26,"away":0.19},"xg":{"home":1.7,"away":1},"notes":"西班牙 16 強靠梅利諾補時進球淘汰葡萄牙；比利時終結地主美國的黑馬之旅。淘汰賽平手須進延長賽與 PK，probs 為 90 分鐘內結果。"},{"id":"QF3","no":99,"round":"quarter-final","roundLabel":"八強","kickoff":"2026-07-11T21:00:00Z","timeConfirmed":true,"venue":{"name":"Hard Rock Stadium","city":"Miami Gardens, FL"},"home":{"name":"挪威","en":"Norway","code":"NOR","color":"#be123c"},"away":{"name":"英格蘭","en":"England","code":"ENG","color":"#334155"},"status":"scheduled","score":null,"probs":{"home":0.27,"draw":0.28,"away":0.45},"xg":{"home":1.1,"away":1.6},"notes":"哈蘭德 16 強射落巴西，挪威成本屆最大黑馬；英格蘭在阿茲提克球場 3:2 險勝墨西哥。三獅陣容深度佔優，挪威主打反擊。"},{"id":"QF4","no":100,"round":"quarter-final","roundLabel":"八強","kickoff":"2026-07-12T01:00:00Z","timeConfirmed":true,"venue":{"name":"BC Place","city":"Vancouver, BC"},"home":{"name":"阿根廷","en":"Argentina","code":"ARG","color":"#38bdf8"},"away":{"name":"瑞士","en":"Switzerland","code":"SUI","color":"#dc2626"},"status":"scheduled","score":null,"probs":{"home":0.58,"draw":0.26,"away":0.16},"xg":{"home":1.6,"away":0.8},"notes":"阿根廷 16 強 3:2 逆轉埃及，梅西領軍完成末段追分；瑞士 PK 淘汰哥倫比亞，鐵血防守 + 門將狀態火燙。"},{"id":"SF1","no":101,"round":"semi-final","roundLabel":"四強","kickoff":"2026-07-14T19:00:00Z","timeConfirmed":true,"venue":{"name":"AT&T Stadium","city":"Arlington, TX"},"home":{"name":"法國","en":"France","code":"FRA","color":"#1e3a8a"},"away":{"name":"QF2 勝者","en":"Winner QF2","code":"TBD","color":"#94a3b8"},"status":"scheduled","score":null,"probs":null,"xg":null,"notes":"法國已鎖定席位，對手待 7/11 西班牙 vs 比利時 產生。開球時間 FIFA 尚未定案。"},{"id":"SF2","no":102,"round":"semi-final","roundLabel":"四強","kickoff":"2026-07-15T19:00:00Z","timeConfirmed":true,"venue":{"name":"Mercedes-Benz Stadium","city":"Atlanta, GA"},"home":{"name":"QF3 勝者","en":"Winner QF3","code":"TBD","color":"#94a3b8"},"away":{"name":"QF4 勝者","en":"Winner QF4","code":"TBD","color":"#94a3b8"},"status":"scheduled","score":null,"probs":null,"xg":null,"notes":"挪威/英格蘭 對 阿根廷/瑞士 的勝者。開球時間 FIFA 尚未定案。"},{"id":"TP","no":103,"round":"third-place","roundLabel":"季軍戰","kickoff":"2026-07-18T21:00:00Z","timeConfirmed":true,"venue":{"name":"Hard Rock Stadium","city":"Miami Gardens, FL"},"home":{"name":"SF1 敗者","en":"Loser SF1","code":"TBD","color":"#94a3b8"},"away":{"name":"SF2 敗者","en":"Loser SF2","code":"TBD","color":"#94a3b8"},"status":"scheduled","score":null,"probs":null,"xg":null,"notes":"開球時間 FIFA 尚未定案。"},{"id":"F","no":104,"round":"final","roundLabel":"冠軍決賽","kickoff":"2026-07-19T19:00:00Z","timeConfirmed":true,"venue":{"name":"MetLife Stadium","city":"East Rutherford, NJ"},"home":{"name":"SF1 勝者","en":"Winner SF1","code":"TBD","color":"#94a3b8"},"away":{"name":"SF2 勝者","en":"Winner SF2","code":"TBD","color":"#94a3b8"},"status":"scheduled","score":null,"probs":null,"xg":null,"notes":"美東時間 7/19 下午 3:00 開球（台灣時間 7/20 03:00）。"}]}</script>
+<script>
+(function () {
+  "use strict";
+
+  var TZ = "Asia/Taipei";
+  var LIVE_WINDOW_MS = 135 * 60 * 1000; // 開球後 135 分鐘內視為進行中（含延長賽與 PK 的緩衝）
+  var state = { data: null, filter: "all" };
+
+  function fmtDateTime(iso, timeConfirmed) {
+    var d = new Date(iso);
+    var date = new Intl.DateTimeFormat("zh-TW", {
+      timeZone: TZ, month: "numeric", day: "numeric", weekday: "short"
+    }).format(d);
+    if (!timeConfirmed) return date + " · 開球時間未定";
+    var time = new Intl.DateTimeFormat("zh-TW", {
+      timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false
+    }).format(d);
+    return date + " " + time;
+  }
+
+  // JSON 裡明確的 finished / live 一律優先（來自 football-data.org）；
+  // 其餘由開球時間與現在時刻推導，讓頁面在資料未刷新時仍會自己往前走。
+  function deriveStatus(match, now) {
+    if (match.status === "finished") return "finished";
+    if (match.status === "live") return "live";
+    var kick = new Date(match.kickoff).getTime();
+    if (!match.timeConfirmed) return "scheduled";
+    if (now < kick) return "scheduled";
+    if (now < kick + LIVE_WINDOW_MS) return "live";
+    return "awaiting"; // 應已踢完但資料尚未回填
+  }
+
+  var STATUS_TEXT = {
+    finished: "已結束",
+    live: "進行中",
+    scheduled: "未開賽",
+    awaiting: "待更新賽果"
+  };
+
+  function countdown(iso, now) {
+    var diff = new Date(iso).getTime() - now;
+    if (diff <= 0) return "";
+    var h = Math.floor(diff / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+    if (h >= 24) {
+      var d = Math.floor(h / 24);
+      return "距開球 " + d + " 天 " + (h % 24) + " 小時";
+    }
+    return "距開球 " + h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  function fairOdds(p) { return (1 / p).toFixed(2); }
+
+  // 比利時的黃、阿根廷的淺藍配白字對比不足，依相對亮度改用深色字。
+  function readableOn(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var lum = (0.2126 * (n >> 16 & 255) + 0.7152 * (n >> 8 & 255) + 0.0722 * (n & 255)) / 255;
+    return lum > 0.6 ? "#1c1917" : "#ffffff";
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function renderCard(m, now) {
+    var status = deriveStatus(m, now);
+    var card = el("div", "card");
+
+    var top = el("div", "card-top");
+    var left = el("div");
+    left.append(el("span", "round", m.roundLabel));
+    left.append(document.createTextNode("　" + fmtDateTime(m.kickoff, m.timeConfirmed)));
+    top.append(left);
+    var right = el("div");
+    right.append(el("span", "status " + status, STATUS_TEXT[status]));
+    right.append(document.createTextNode("　" + m.venue.name + "・" + m.venue.city));
+    top.append(right);
+    card.append(top);
+
+    var teams = el("div", "teams");
+    [m.home, "mid", m.away].forEach(function (t, i) {
+      if (t === "mid") {
+        var mid = el("div", "mid");
+        if (m.score) {
+          mid.append(el("div", "score", m.score.home + " : " + m.score.away));
+          if (m.score.duration === "EXTRA_TIME") {
+            mid.append(el("div", "countdown", "延長賽後"));
+          } else if (m.score.duration === "PENALTY_SHOOTOUT" && m.score.penalties) {
+            mid.append(el("div", "countdown",
+              "PK " + m.score.penalties.home + ":" + m.score.penalties.away));
+          }
+        } else {
+          mid.append(el("div", "vs", "VS"));
+          var cd = countdown(m.kickoff, now);
+          if (cd && m.timeConfirmed) mid.append(el("div", "countdown", cd));
+        }
+        teams.append(mid);
+        return;
+      }
+      var side = el("div", "team");
+      var badge = el("div", "badge", t.code === "TBD" ? "?" : t.code);
+      badge.style.background = t.color;
+      badge.style.color = readableOn(t.color);
+      side.append(badge);
+      side.append(el("div", "tname", t.name));
+      if (m.probs) {
+        var p = i === 0 ? m.probs.home : m.probs.away;
+        side.append(el("div", "fair", "公平賠率 " + fairOdds(p)));
+      }
+      teams.append(side);
+    });
+    card.append(teams);
+
+    if (m.probs) {
+      var bar = el("div", "bar");
+      [[m.probs.home, m.home.color], [m.probs.draw, "var(--muted)"], [m.probs.away, m.away.color]]
+        .forEach(function (seg) {
+          var s = el("span");
+          s.style.width = (seg[0] * 100) + "%";
+          s.style.background = seg[1];
+          bar.append(s);
+        });
+      card.append(bar);
+
+      var lg = el("div", "legend");
+      lg.append(el("span", null, m.home.code + "勝 " + Math.round(m.probs.home * 100) + "%"));
+      lg.append(el("span", null, "和局 " + Math.round(m.probs.draw * 100) + "%"));
+      lg.append(el("span", null, m.away.code + "勝 " + Math.round(m.probs.away * 100) + "%"));
+      card.append(lg);
+    }
+
+    if (m.xg) {
+      card.append(el("div", "xg",
+        "預期進球 xG　" + m.home.code + " " + m.xg.home.toFixed(1) + " － " + m.xg.away.toFixed(1) + " " + m.away.code));
+    }
+
+    if (m.notes) card.append(el("p", m.probs ? "notes" : "tbd", m.notes));
+    return card;
+  }
+
+  function render() {
+    if (!state.data) return;
+    var now = Date.now();
+    var list = document.getElementById("list");
+    list.replaceChildren();
+
+    state.data.matches
+      .filter(function (m) { return state.filter === "all" || m.round === state.filter; })
+      .forEach(function (m) { list.append(renderCard(m, now)); });
+
+    document.getElementById("stamp").textContent = fmtDateTime(state.data.meta.lastUpdated, true);
+    document.getElementById("clock").textContent = new Intl.DateTimeFormat("zh-TW", {
+      timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    }).format(new Date(now));
+  }
+
+  function buildFilters() {
+    var rounds = [["all", "全部"], ["quarter-final", "八強"], ["semi-final", "四強"],
+                  ["third-place", "季軍戰"], ["final", "決賽"]];
+    var box = document.getElementById("filters");
+    rounds.forEach(function (r) {
+      var b = el("button", "chip", r[1]);
+      b.setAttribute("aria-pressed", String(state.filter === r[0]));
+      b.addEventListener("click", function () {
+        state.filter = r[0];
+        box.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+        b.setAttribute("aria-pressed", "true");
+        render();
+      });
+      box.append(b);
+    });
+  }
+
+  // 先用內嵌快照開場（讓 file:// 直開也能用），再嘗試向伺服器抓最新的 matches.json。
+  function load() {
+    state.data = JSON.parse(document.getElementById("bootstrap").textContent);
+    buildFilters();
+    render();
+    refetch();
+  }
+
+  function refetch() {
+    var btn = document.getElementById("refresh");
+    btn.disabled = true;
+    fetch("data/matches.json?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (json) { state.data = json; render(); })
+      .catch(function () { /* file:// 或離線：沿用內嵌快照 */ })
+      .finally(function () { btn.disabled = false; });
+  }
+
+  document.getElementById("refresh").addEventListener("click", refetch);
+  setInterval(render, 1000);       // 倒數與狀態每秒重算
+  setInterval(refetch, 5 * 60000); // 每 5 分鐘拉一次資料
+  load();
+})();
+</script>
+</body>
+</html>

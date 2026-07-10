@@ -1,0 +1,69 @@
+name: 世足資料自動刷新
+
+on:
+  schedule:
+    # 台灣時間 09:00 / 15:00 / 21:00 / 03:00（UTC 01/07/13/19）
+    - cron: "0 1,7,13,19 * * *"
+  push:
+    paths:
+      - "index.html"
+      - "data/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+# 同一時間只跑一個，避免兩次排程同時 push 互相打架
+concurrency:
+  group: worldcup-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write # 世界盃結束後自動停用本 workflow
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 決賽為 2026-07-19（美東），保留兩天緩衝抓最終賽果後自動停用
+      - name: 世界盃結束檢查
+        id: gate
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%Y%m%d)" -gt 20260721 ]; then
+            echo "世界盃已結束，停用排程"
+            gh workflow disable "worldcup-daily.yml" --repo "$GITHUB_REPOSITORY"
+            echo "stop=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.stop != 'true'
+        with:
+          node-version: "20"
+
+      # push 事件只驗證，不連外也不回寫，避免與開發者的提交打架
+      - name: 驗證資料
+        if: github.event_name == 'push' && steps.gate.outputs.stop != 'true'
+        run: node scripts/refresh.mjs --check
+
+      - name: 抓取賽果並刷新快照
+        if: github.event_name != 'push' && steps.gate.outputs.stop != 'true'
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: node scripts/refresh.mjs --fetch
+
+      - name: Commit
+        if: github.event_name != 'push' && steps.gate.outputs.stop != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "資料無異動，跳過提交"
+            exit 0
+          fi
+          git add index.html data
+          git commit -m "chore: 世足賽果自動刷新 ($(date -u +'%Y-%m-%d %H:%M') UTC)"
+          git push
