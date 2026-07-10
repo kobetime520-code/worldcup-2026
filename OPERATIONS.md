@@ -10,13 +10,13 @@
 
 ## 一、每日巡檢（約 2 分鐘）
 
-排程於台灣時間 **09:00 / 15:00 / 21:00 / 03:00** 各跑一次。建議在 09:00 那班之後巡檢，該班會收進前一晚的賽果。
+排程**每 10 分鐘**跑一次（GitHub 尖峰時可能延遲，實際約 10–20 分鐘）。淘汰賽多在台灣清晨開打，建議早上巡檢一次即可。
 
 ```bash
 # 1. 近期排程是否都成功
 gh run list --workflow worldcup-daily.yml --repo kobetime520-code/worldcup-2026 --limit 6
 
-# 2. 線上資料是否新鮮（lastUpdated 應在 6 小時內）
+# 2. 線上資料是否新鮮（lastUpdated 應在 20 分鐘內；網頁上超過 20 分鐘會以金色標示）
 curl -s https://kobetime520-code.github.io/worldcup-2026/data/matches.json | grep lastUpdated
 
 # 3. 資料一致性

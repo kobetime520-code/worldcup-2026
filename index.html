@@ -102,6 +102,18 @@
 
   .meta { text-align: right; font-size: .7rem; color: rgba(255,255,255,.7); }
   .meta b { display: block; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .age { display: block; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  /* 資料超過 20 分鐘未刷新：排程約每 10 分鐘一次，此時代表可能有延誤 */
+  .age.stale { color: var(--gold-bright); font-weight: 700; }
+
+  .reload-status {
+    margin: 8px 0 0; min-height: 1.1em;
+    font-size: .68rem; font-weight: 700;
+    color: rgba(255,255,255,.75);
+  }
+  .reload-status.ok  { color: #7ff0b5; }
+  .reload-status.err { color: #ffb3c0; }
+
   .reload {
     margin-top: 10px; padding: 7px 14px; cursor: pointer;
     font: inherit; font-size: .72rem; font-weight: 800;
@@ -273,8 +285,9 @@
     </div>
     <div class="meta">
       資料版本 <b id="stamp">—</b>
-      頁面時間 <b id="clock">—</b>
+      <span id="age" class="age">—</span>
       <button class="reload" id="reload" type="button">重新載入</button>
+      <p class="reload-status" id="reload-status" role="status" aria-live="polite"></p>
     </div>
   </div>
 </header>
@@ -286,7 +299,7 @@
   <footer>
     <p>機率為<strong>啟發式先驗</strong>（賽前評分 + 本屆走勢 + 傷停），非回測擬合模型；「公平賠率」為 1 ÷ 機率的推導值，<strong>不是任何博彩公司的盤口報價</strong>。</p>
     <p>本頁僅供足球分析與資料視覺化參考，不構成投注建議。運彩具財務風險，請自行斟酌。</p>
-    <p>DeepGoal v8 · 賽果每 6 小時自 football-data.org 自動刷新 · 維護：Ann（Team PID）</p>
+    <p>DeepGoal v8 · 賽果每 10 分鐘自 football-data.org 自動刷新 · 維護：Ann（Team PID）</p>
   </footer>
 </div>
 
@@ -297,7 +310,9 @@
 
   var TZ = "Asia/Taipei";
   var LIVE_WINDOW_MS = 135 * 60 * 1000; // 開球後 135 分鐘內視為進行中（含延長賽與 PK 的緩衝）
-  var state = { data: null, filter: "all" };
+  var POLL_MS = 2 * 60 * 1000;          // 排程約每 10 分鐘更新一次，輪詢比它密即可
+  var STALE_AFTER_MIN = 20;             // 超過兩個排程週期仍未更新，視為可能延誤
+  var state = { data: null, payload: null, filter: "all" };
 
   var STATE_TEXT = {
     finished: "已結束",
@@ -466,9 +481,19 @@
       .forEach(function (m) { list.append(renderCard(m, now)); });
 
     document.getElementById("stamp").textContent = fmtDateTime(state.data.meta.lastUpdated, true);
-    document.getElementById("clock").textContent = new Intl.DateTimeFormat("zh-TW", {
-      timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-    }).format(new Date(now));
+
+    var age = document.getElementById("age");
+    var mins = Math.max(0, Math.floor((now - Date.parse(state.data.meta.lastUpdated)) / 60000));
+    age.textContent = describeAge(mins);
+    age.classList.toggle("stale", mins >= STALE_AFTER_MIN);
+  }
+
+  function describeAge(mins) {
+    if (mins < 1) return "剛剛更新";
+    if (mins < 60) return mins + " 分鐘前更新";
+    var h = Math.floor(mins / 60);
+    if (h < 24) return h + " 小時前更新";
+    return Math.floor(h / 24) + " 天前更新";
   }
 
   function buildTabs() {
@@ -492,24 +517,61 @@
   // 先用內嵌快照開場（讓 file:// 直開也能用），再嘗試向伺服器抓最新的 matches.json。
   function load() {
     state.data = JSON.parse(document.getElementById("bootstrap").textContent);
+    state.payload = JSON.stringify(state.data.matches);
     buildTabs();
     render();
-    refetch();
+    refetch(false);
   }
 
-  function refetch() {
+  var statusTimer = null;
+  function setStatus(text, kind) {
+    var st = document.getElementById("reload-status");
+    st.textContent = text;
+    st.className = "reload-status" + (kind ? " " + kind : "");
+    clearTimeout(statusTimer);
+    if (text) statusTimer = setTimeout(function () { setStatus("", ""); }, 5000);
+  }
+
+  /**
+   * 抓的是 data/matches.json —— 由排程每 ~10 分鐘自 football-data.org 更新的快照，
+   * 不是 API 本身（該 API 不回 CORS 標頭，且 token 不能放在公開頁面）。
+   * manual 為 true 時才在畫面上回報結果，避免背景輪詢洗版。
+   */
+  function refetch(manual) {
     var btn = document.getElementById("reload");
+
+    if (manual && location.protocol === "file:") {
+      setStatus("本機檔案模式，僅顯示內嵌快照", "err");
+      return;
+    }
+
     btn.disabled = true;
+    if (manual) setStatus("更新中…", "");
+
     fetch("data/matches.json?v=" + Date.now(), { cache: "no-store" })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (json) { state.data = json; render(); })
-      .catch(function () { /* file:// 或離線：沿用內嵌快照 */ })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (json) {
+        var next = JSON.stringify(json.matches);
+        var changed = next !== state.payload;
+        state.payload = next;
+        state.data = json;
+        render();
+        if (manual) setStatus(changed ? "已載入新賽果" : "已是最新資料", changed ? "ok" : "");
+      })
+      .catch(function (err) {
+        // 靜默失敗會讓按鈕看起來壞掉；手動觸發時一定要說出原因。
+        if (manual) setStatus("更新失敗：" + err.message, "err");
+        else console.warn("背景刷新失敗，沿用現有資料", err);
+      })
       .finally(function () { btn.disabled = false; });
   }
 
-  document.getElementById("reload").addEventListener("click", refetch);
-  setInterval(render, 1000);       // 倒數與狀態每秒重算
-  setInterval(refetch, 5 * 60000); // 每 5 分鐘拉一次資料
+  document.getElementById("reload").addEventListener("click", function () { refetch(true); });
+  setInterval(render, 1000);                                   // 倒數與狀態每秒重算
+  setInterval(function () { refetch(false); }, POLL_MS);       // 背景輪詢，不在畫面上回報
   load();
 })();
 </script>
