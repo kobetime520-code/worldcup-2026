@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-10T06:46:03Z",
+    "lastUpdated": "2026-07-10T07:50:59Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -192,7 +192,7 @@
       "score": null,
       "probs": null,
       "xg": null,
-      "notes": "法國已鎖定席位，對手待 7/11 西班牙 vs 比利時 產生。開球時間 FIFA 尚未定案。"
+      "notes": "法國已鎖定席位，對手待 7/11 西班牙 vs 比利時 產生。"
     },
     {
       "id": "SF2",
@@ -221,7 +221,7 @@
       "score": null,
       "probs": null,
       "xg": null,
-      "notes": "挪威/英格蘭 對 阿根廷/瑞士 的勝者。開球時間 FIFA 尚未定案。"
+      "notes": "挪威/英格蘭 對 阿根廷/瑞士 的勝者。"
     },
     {
       "id": "TP",
@@ -250,7 +250,7 @@
       "score": null,
       "probs": null,
       "xg": null,
-      "notes": "開球時間 FIFA 尚未定案。"
+      "notes": "四強兩支敗隊爭季軍。"
     },
     {
       "id": "F",
