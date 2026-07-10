@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-10T07:50:59Z",
+    "lastUpdated": "2026-07-10T19:46:43Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -80,8 +80,13 @@
         "code": "BEL",
         "color": "#eab308"
       },
-      "status": "scheduled",
-      "score": null,
+      "status": "live",
+      "score": {
+        "home": 1,
+        "away": 0,
+        "duration": "REGULAR",
+        "penalties": null
+      },
       "probs": {
         "home": 0.55,
         "draw": 0.26,
