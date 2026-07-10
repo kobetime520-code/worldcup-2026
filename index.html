@@ -114,14 +114,27 @@
   .reload-status.ok  { color: #7ff0b5; }
   .reload-status.err { color: #ffb3c0; }
 
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap; }
+
   .reload {
-    margin-top: 10px; padding: 7px 14px; cursor: pointer;
+    padding: 7px 14px; cursor: pointer;
     font: inherit; font-size: .72rem; font-weight: 800;
     color: #06301c; background: var(--gold-bright);
     border: 0; border-radius: 999px;
   }
   .reload:hover { filter: brightness(1.08); }
   .reload:disabled { opacity: .55; cursor: default; }
+
+  /* 外部連結，非本站資料：用外框而非實心，與「重新載入」的主動作區隔 */
+  .lottery {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 13px; border-radius: 999px;
+    font-size: .72rem; font-weight: 800; text-decoration: none;
+    color: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.38);
+  }
+  .lottery:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.6); }
+  .lottery svg { width: 11px; height: 11px; flex: none; }
 
   /* ── 輪次分頁 ───────────────────────────────── */
   .rounds { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
@@ -254,6 +267,7 @@
   @media (max-width: 560px) {
     .stadium { padding: 28px 16px 24px; }
     .meta { text-align: left; }
+    .actions { justify-content: flex-start; }
     .match-top { padding: 10px 14px 10px 18px; }
     .fixture { padding: 22px 10px 18px 14px; gap: 4px; }
     .badge { width: 52px; height: 52px; font-size: .85rem; }
@@ -286,7 +300,18 @@
     <div class="meta">
       資料版本 <b id="stamp">—</b>
       <span id="age" class="age">—</span>
-      <button class="reload" id="reload" type="button">重新載入</button>
+      <div class="actions">
+        <button class="reload" id="reload" type="button">重新載入</button>
+        <a class="lottery"
+           href="https://www.sportslottery.com.tw/sportsbook/sport/%E8%B6%B3%E7%90%83/34740.1"
+           target="_blank" rel="noopener noreferrer">
+          台灣運彩官方盤口
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M9 7h8v8"/>
+          </svg>
+        </a>
+      </div>
       <p class="reload-status" id="reload-status" role="status" aria-live="polite"></p>
     </div>
   </div>
@@ -298,6 +323,7 @@
 
   <footer>
     <p>機率為<strong>啟發式先驗</strong>（賽前評分 + 本屆走勢 + 傷停），非回測擬合模型；「公平賠率」為 1 ÷ 機率的推導值，<strong>不是任何博彩公司的盤口報價</strong>。</p>
+    <p>標頭的「台灣運彩官方盤口」是<strong>外部連結</strong>。本站不抓取、不轉載其賠率，兩者數字不會一致，也不應互相對照。該站投注須年滿 18 歲。</p>
     <p>本頁僅供足球分析與資料視覺化參考，不構成投注建議。運彩具財務風險，請自行斟酌。</p>
     <p>DeepGoal v8 · 賽果每 10 分鐘自 football-data.org 自動刷新 · 維護：Ann（Team PID）</p>
   </footer>
