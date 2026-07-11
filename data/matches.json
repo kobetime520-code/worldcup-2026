@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-10T22:11:38Z",
+    "lastUpdated": "2026-07-11T08:12:50Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -188,10 +188,10 @@
         "color": "#1e3a8a"
       },
       "away": {
-        "name": "QF2 勝者",
-        "en": "Winner QF2",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "西班牙",
+        "en": "Spain",
+        "code": "ESP",
+        "color": "#dc2626"
       },
       "status": "scheduled",
       "score": null,
