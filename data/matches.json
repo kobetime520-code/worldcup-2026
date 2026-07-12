@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-12T04:38:41Z",
+    "lastUpdated": "2026-07-12T07:16:40Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -221,16 +221,16 @@
         "city": "Atlanta, GA"
       },
       "home": {
-        "name": "QF3 勝者",
-        "en": "Winner QF3",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "英格蘭",
+        "en": "England",
+        "code": "ENG",
+        "color": "#334155"
       },
       "away": {
-        "name": "QF4 勝者",
-        "en": "Winner QF4",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "阿根廷",
+        "en": "Argentina",
+        "code": "ARG",
+        "color": "#38bdf8"
       },
       "status": "scheduled",
       "score": null,
