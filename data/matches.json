@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-12T07:16:40Z",
+    "lastUpdated": "2026-07-14T20:15:36Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -203,8 +203,13 @@
         "code": "ESP",
         "color": "#dc2626"
       },
-      "status": "scheduled",
-      "score": null,
+      "status": "live",
+      "score": {
+        "home": 0,
+        "away": 1,
+        "duration": "REGULAR",
+        "penalties": null
+      },
       "probs": null,
       "xg": null,
       "notes": "法國已鎖定席位，對手待 7/11 西班牙 vs 比利時 產生。"
