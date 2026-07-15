@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-14T21:26:06Z",
+    "lastUpdated": "2026-07-15T06:32:07Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -255,10 +255,10 @@
         "city": "Miami Gardens, FL"
       },
       "home": {
-        "name": "SF1 敗者",
-        "en": "Loser SF1",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "法國",
+        "en": "France",
+        "code": "FRA",
+        "color": "#1e3a8a"
       },
       "away": {
         "name": "SF2 敗者",
@@ -284,10 +284,10 @@
         "city": "East Rutherford, NJ"
       },
       "home": {
-        "name": "SF1 勝者",
-        "en": "Winner SF1",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "西班牙",
+        "en": "Spain",
+        "code": "ESP",
+        "color": "#dc2626"
       },
       "away": {
         "name": "SF2 勝者",
