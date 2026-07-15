@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-15T06:32:07Z",
+    "lastUpdated": "2026-07-15T19:56:41Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -237,8 +237,13 @@
         "code": "ARG",
         "color": "#38bdf8"
       },
-      "status": "scheduled",
-      "score": null,
+      "status": "live",
+      "score": {
+        "home": 0,
+        "away": 0,
+        "duration": "REGULAR",
+        "penalties": null
+      },
       "probs": null,
       "xg": null,
       "notes": "挪威/英格蘭 對 阿根廷/瑞士 的勝者。"
