@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-15T21:09:35Z",
+    "lastUpdated": "2026-07-16T08:32:41Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -266,10 +266,10 @@
         "color": "#1e3a8a"
       },
       "away": {
-        "name": "SF2 敗者",
-        "en": "Loser SF2",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "英格蘭",
+        "en": "England",
+        "code": "ENG",
+        "color": "#334155"
       },
       "status": "scheduled",
       "score": null,
@@ -295,10 +295,10 @@
         "color": "#dc2626"
       },
       "away": {
-        "name": "SF2 勝者",
-        "en": "Winner SF2",
-        "code": "TBD",
-        "color": "#94a3b8"
+        "name": "阿根廷",
+        "en": "Argentina",
+        "code": "ARG",
+        "color": "#38bdf8"
       },
       "status": "scheduled",
       "score": null,
