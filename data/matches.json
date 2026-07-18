@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-16T08:32:41Z",
+    "lastUpdated": "2026-07-18T21:32:06Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -271,8 +271,13 @@
         "code": "ENG",
         "color": "#334155"
       },
-      "status": "scheduled",
-      "score": null,
+      "status": "live",
+      "score": {
+        "home": 0,
+        "away": 2,
+        "duration": "REGULAR",
+        "penalties": null
+      },
       "probs": null,
       "xg": null,
       "notes": "四強兩支敗隊爭季軍。"
