@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-18T22:30:12Z",
+    "lastUpdated": "2026-07-18T23:34:16Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -271,10 +271,10 @@
         "code": "ENG",
         "color": "#334155"
       },
-      "status": "live",
+      "status": "finished",
       "score": {
-        "home": 2,
-        "away": 4,
+        "home": 4,
+        "away": 6,
         "duration": "REGULAR",
         "penalties": null
       },
