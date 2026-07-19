@@ -6,7 +6,7 @@
       "Canada",
       "Mexico"
     ],
-    "lastUpdated": "2026-07-18T23:34:16Z",
+    "lastUpdated": "2026-07-19T12:28:51Z",
     "displayTimezone": "Asia/Taipei",
     "source": "football-data.org v4 (competition WC)；未設定 token 時保留人工維護的資料",
     "dataNotes": {
@@ -307,9 +307,13 @@
       },
       "status": "scheduled",
       "score": null,
-      "probs": null,
+      "probs": {
+        "home": 0.42,
+        "draw": 0.31,
+        "away": 0.27
+      },
       "xg": null,
-      "notes": "美東時間 7/19 下午 3:00 開球（台灣時間 7/20 03:00）。"
+      "notes": "賽前戰報：西班牙 7 戰全勝、6 場零封僅失 1 球（對手場均 xG 0.31，1966 年有紀錄以來最低），37 場不敗；阿根廷同樣 7 戰全勝、進 19 球全隊最多，但 4 場淘汰賽全在 75 分鐘後逆轉或延長賽分勝負，梅西 8 球並參與全隊 113 次進攻機會中的 99 次。Opta 超級電腦捧盃機率西 59.5% vs 阿 40.5%；ESPN 9 名記者 7 人押西班牙。本場 probs 取自 Polymarket 預測市場成交中價（例外於啟發式先驗；量約 $650 萬、negRisk 無抽水），為 90 分鐘內結果——和局 31% 暗示極可能進延長賽，而那正是阿根廷本屆的主場景。19 歲亞馬爾 vs 39 歲梅西：體系控制對決絕境韌性。美東 7/19 15:00 開球（台灣 7/20 03:00）。"
     }
   ]
 }
